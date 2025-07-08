@@ -159,15 +159,15 @@
         </div>
         
         <div id="controls">
-            <h3>🌐360全景查看器</h3>
+            <h3>360全景查看器</h3>
             <select id="locationSelect">
                 <option value="observatory">天文台</option>
-                <option value="interior">室內</option>
+                <option value="interior">室內環境</option>
             </select>
-            <p>🖱️拖拽：環顧四周</p>
-            <p>🔍滾輪：縮放</p>
-            <p>📱觸控：滑動查看</p>
-            <p>🎯點擊綠點：切換地點</p>
+            <p>拖拽：環顧四周</p>
+            <p>滾輪：縮放</p>
+            <p>觸控：滑動查看</p>
+            <p>點擊綠點：切換地點</p>
         </div>
         
         <div id="info">
@@ -190,14 +190,16 @@
         const locations = {
             observatory: {
                 name: '天文台',
-                image: './sample_photo.jpg',  // 改為您的圖片路徑
+                image: './sample_photo.jpg',
+                description: '天文台主觀測站',
                 hotspots: [
                     { x: 0.3, y: 0.2, target: 'interior', label: '進入室內' }
                 ]
             },
             interior: {
                 name: '室內環境',
-                image: './AdobeStock_249823850_Preview.jpeg',  // 改為您的圖片路徑
+                image: './AdobeStock_249823850_Preview.jpeg',
+                description: '室內環境',
                 hotspots: [
                     { x: -0.3, y: 0.1, target: 'observatory', label: '回到天文台' }
                 ]
@@ -256,14 +258,17 @@
             document.getElementById('loading').style.display = 'block';
             document.getElementById('currentLocation').textContent = location.name;
             
+            // 更新選擇器
+            document.getElementById('locationSelect').value = locationId;
+            
             // 清除現有熱點
             clearHotspots();
             
-            // 使用您資料夾中的圖片
+            // 載入紋理
             const loader = new THREE.TextureLoader();
             
             loader.load(
-                location.image,  // 直接使用 location.image 路徑
+                location.image,
                 function(texture) {
                     // 紋理載入成功
                     sphere.material.map = texture;
@@ -297,22 +302,30 @@
             // 創建漸變背景
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
             if (locationId === 'observatory') {
-                gradient.addColorStop(0, '#1a1a2e');
-                gradient.addColorStop(1, '#16213e');
+                // 天文台 - 藍天白雲風格
+                gradient.addColorStop(0, '#87CEEB'); // 天空藍
+                gradient.addColorStop(0.3, '#F4A460'); // 沙棕色
+                gradient.addColorStop(1, '#CD853F'); // 深沙色
             } else {
-                gradient.addColorStop(0, '#f5f5f5');
-                gradient.addColorStop(1, '#e0e0e0');
+                // 室內環境 - 混凝土風格
+                gradient.addColorStop(0, '#2F2F2F'); // 深灰
+                gradient.addColorStop(0.5, '#404040'); // 中灰
+                gradient.addColorStop(1, '#1A1A1A'); // 暗灰
             }
             
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             // 添加文字
-            ctx.fillStyle = locationId === 'observatory' ? '#ffffff' : '#333333';
-            ctx.font = '60px Arial';
+            ctx.fillStyle = locationId === 'observatory' ? '#000000' : '#ffffff';
+            ctx.font = 'bold 60px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(locations[locationId].name, canvas.width / 2, canvas.height / 2);
+            ctx.fillText(locations[locationId].name, canvas.width / 2, canvas.height / 2 - 30);
+            
+            // 添加描述
+            ctx.font = '30px Arial';
+            ctx.fillText(locations[locationId].description, canvas.width / 2, canvas.height / 2 + 30);
             
             const texture = new THREE.CanvasTexture(canvas);
             sphere.material.map = texture;
